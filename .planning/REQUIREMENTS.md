@@ -57,7 +57,7 @@
 ### Match & Scoring
 
 - [ ] **MATCH-01**: Coach can create a match (opponent, date, optional notes)
-- [ ] **MATCH-02**: Single scorer per match (no concurrent use)
+- [ ] **MATCH-02**: Single scorer per match — match is locked to the scoring coach's session; other users see read-only
 - [ ] **MATCH-03**: Scoring works identically to current app (position 1 = server, +1/-1 buttons)
 - [ ] **MATCH-04**: Court rotation preserved (1->6->5->4->3->2->1 cycle)
 - [ ] **MATCH-05**: Event log preserves court_json snapshot on every event
@@ -148,78 +148,78 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| MIG-01 | TBD | Pending |
-| MIG-02 | TBD | Pending |
-| MIG-03 | TBD | Pending |
-| MIG-04 | TBD | Pending |
-| AUTH-01 | TBD | Pending |
-| AUTH-02 | TBD | Pending |
-| AUTH-03 | TBD | Pending |
-| AUTH-04 | TBD | Pending |
-| AUTH-05 | TBD | Pending |
-| ADM-01 | TBD | Pending |
-| ADM-02 | TBD | Pending |
-| ADM-03 | TBD | Pending |
-| ADM-04 | TBD | Pending |
-| ADM-05 | TBD | Pending |
-| ADM-06 | TBD | Pending |
-| ROLE-01 | TBD | Pending |
-| ROLE-02 | TBD | Pending |
-| ROLE-03 | TBD | Pending |
-| ROLE-04 | TBD | Pending |
-| TEAM-01 | TBD | Pending |
-| TEAM-02 | TBD | Pending |
-| TEAM-03 | TBD | Pending |
-| TEAM-04 | TBD | Pending |
-| TEAM-05 | TBD | Pending |
-| TEAM-06 | TBD | Pending |
-| TEAM-07 | TBD | Pending |
-| DB-01 | TBD | Pending |
-| DB-02 | TBD | Pending |
-| DB-03 | TBD | Pending |
-| DB-04 | TBD | Pending |
-| DB-05 | TBD | Pending |
-| MATCH-01 | TBD | Pending |
-| MATCH-02 | TBD | Pending |
-| MATCH-03 | TBD | Pending |
-| MATCH-04 | TBD | Pending |
-| MATCH-05 | TBD | Pending |
-| MATCH-06 | TBD | Pending |
-| SYNC-01 | TBD | Pending |
-| SYNC-02 | TBD | Pending |
-| SYNC-03 | TBD | Pending |
-| SYNC-04 | TBD | Pending |
-| SYNC-05 | TBD | Pending |
-| SYNC-06 | TBD | Pending |
-| STAT-01 | TBD | Pending |
-| STAT-02 | TBD | Pending |
-| STAT-03 | TBD | Pending |
-| STAT-04 | TBD | Pending |
-| STAT-05 | TBD | Pending |
-| STAT-06 | TBD | Pending |
-| STAT-07 | TBD | Pending |
-| UI-01 | TBD | Pending |
-| UI-02 | TBD | Pending |
-| UI-03 | TBD | Pending |
-| UI-04 | TBD | Pending |
-| UI-05 | TBD | Pending |
-| UI-06 | TBD | Pending |
-| UI-07 | TBD | Pending |
-| I18N-01 | TBD | Pending |
-| I18N-02 | TBD | Pending |
-| I18N-03 | TBD | Pending |
-| SEC-01 | TBD | Pending |
-| SEC-02 | TBD | Pending |
-| SEC-03 | TBD | Pending |
-| SEC-04 | TBD | Pending |
-| SEC-05 | TBD | Pending |
-| SEC-06 | TBD | Pending |
+| MIG-01 | Phase 1 | Pending |
+| MIG-02 | Phase 1 | Pending |
+| MIG-03 | Phase 1 | Pending |
+| MIG-04 | Phase 1 | Pending |
+| DB-01 | Phase 1 | Pending |
+| DB-02 | Phase 1 | Pending |
+| DB-03 | Phase 1 | Pending |
+| DB-04 | Phase 1 | Pending |
+| AUTH-01 | Phase 2 | Pending |
+| AUTH-02 | Phase 2 | Pending |
+| AUTH-03 | Phase 2 | Pending |
+| AUTH-04 | Phase 2 | Pending |
+| AUTH-05 | Phase 2 | Pending |
+| ROLE-01 | Phase 2 | Pending |
+| ROLE-02 | Phase 2 | Pending |
+| ROLE-03 | Phase 2 | Pending |
+| ROLE-04 | Phase 2 | Pending |
+| UI-07 | Phase 2 | Pending |
+| MATCH-01 | Phase 3 | Pending |
+| MATCH-02 | Phase 3 | Pending |
+| MATCH-03 | Phase 3 | Pending |
+| MATCH-04 | Phase 3 | Pending |
+| MATCH-05 | Phase 3 | Pending |
+| MATCH-06 | Phase 3 | Pending |
+| SYNC-01 | Phase 3 | Pending |
+| SYNC-02 | Phase 3 | Pending |
+| SYNC-03 | Phase 3 | Pending |
+| SYNC-04 | Phase 3 | Pending |
+| SYNC-05 | Phase 3 | Pending |
+| SYNC-06 | Phase 3 | Pending |
+| UI-01 | Phase 3 | Pending |
+| UI-02 | Phase 3 | Pending |
+| UI-03 | Phase 3 | Pending |
+| UI-04 | Phase 3 | Pending |
+| UI-05 | Phase 3 | Pending |
+| UI-06 | Phase 3 | Pending |
+| SEC-01 | Phase 3 | Pending |
+| SEC-02 | Phase 3 | Pending |
+| SEC-04 | Phase 3 | Pending |
+| SEC-06 | Phase 3 | Pending |
+| STAT-01 | Phase 4 | Pending |
+| STAT-02 | Phase 4 | Pending |
+| STAT-03 | Phase 4 | Pending |
+| STAT-04 | Phase 4 | Pending |
+| STAT-05 | Phase 4 | Pending |
+| STAT-06 | Phase 4 | Pending |
+| STAT-07 | Phase 4 | Pending |
+| TEAM-01 | Phase 4 | Pending |
+| TEAM-02 | Phase 4 | Pending |
+| TEAM-03 | Phase 4 | Pending |
+| TEAM-04 | Phase 4 | Pending |
+| TEAM-05 | Phase 4 | Pending |
+| TEAM-06 | Phase 4 | Pending |
+| TEAM-07 | Phase 4 | Pending |
+| SEC-05 | Phase 4 | Pending |
+| ADM-01 | Phase 5 | Pending |
+| ADM-02 | Phase 5 | Pending |
+| ADM-03 | Phase 5 | Pending |
+| ADM-04 | Phase 5 | Pending |
+| ADM-05 | Phase 5 | Pending |
+| ADM-06 | Phase 5 | Pending |
+| I18N-01 | Phase 5 | Pending |
+| I18N-02 | Phase 5 | Pending |
+| I18N-03 | Phase 5 | Pending |
+| SEC-03 | Phase 5 | Pending |
+| DB-05 | Phase 5 | Pending |
 
 **Coverage:**
 - v1 requirements: 56 total
-- Mapped to phases: 0
-- Unmapped: 56
+- Mapped to phases: 56
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-04*
-*Last updated: 2026-04-04 after initial definition*
+*Last updated: 2026-04-04 after roadmap creation*
