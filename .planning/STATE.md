@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 01-foundation/01-01-PLAN.md
-last_updated: "2026-04-04T14:44:27.116Z"
+stopped_at: "Checkpoint: 01-02 Task 2 human-verify"
+last_updated: "2026-04-04T14:54:09.729Z"
 last_activity: 2026-04-04
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 4
-  completed_plans: 2
-  percent: 50
+  completed_plans: 3
+  percent: 75
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-04)
 ## Current Position
 
 Phase: 01 (foundation) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 Status: Ready to execute
 Last activity: 2026-04-04
 
@@ -53,6 +53,7 @@ Progress: [░░░░░░░░░░] 0%
 
 *Updated after each plan completion*
 | Phase 01-foundation P01 | 25min | 1 tasks | 15 files |
+| Phase 01-foundation P02 | 10 | 1 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -68,6 +69,7 @@ Recent decisions affecting current work:
 - Testing: RLS isolation tested with 2 real users in 2 clubs before Phase 4 completes
 - [Phase 01-foundation]: jsdom vitest environment for esc() tests (document.createElement dependency)
 - [Phase 01-foundation]: Pure functions for scoring: recalcScores/calcStreaks take events array as param, no global reads
+- [Phase 01-foundation]: Expose render handlers to window via Object.assign for inline onclick compatibility in generated HTML
 
 ### Pending Todos
 
@@ -80,6 +82,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-04T14:44:27.113Z
-Stopped at: Completed 01-foundation/01-01-PLAN.md
+Last session: 2026-04-04T14:54:09.726Z
+Stopped at: Checkpoint: 01-02 Task 2 human-verify
 Resume file: None
