@@ -10,6 +10,10 @@
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
+  <div id="auth-container">
+    <!-- auth screens render here dynamically -->
+  </div>
+  <div id="scoring-container" style="display: none">
   <div class="top-btns">
     <button class="top-btn" id="themeBtn" aria-label="Vaihda teema">&#9790;</button>
     <button class="top-btn" id="helpBtn">?</button>
@@ -93,6 +97,8 @@
   <div class="picker-overlay" id="pickerOverlay">
     <div class="picker" id="picker"></div>
   </div>
+
+  </div><!-- end scoring-container -->
 
   <script type="module" src="/src/main.ts"></script>
 </body>

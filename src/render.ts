@@ -5,10 +5,13 @@ import { recalcScores, calcStreaks, calcScoreView } from './scoring'
 import { saveState, encodeShareUrl } from './persistence'
 import { rotate as rotateCourt } from './court'
 import type { CourtPosition } from './types'
+import { sendMagicLink, signOutUser } from './auth'
+import { fetchTeams, fetchUserProfile } from './teams'
 
 // ── renderAll ────────────────────────────────────────────────────────────────
 
 export function renderAll(): void {
+  if (state.authScreen !== 'scoring') return
   renderSetBar()
   renderRoster()
   renderCourt()
@@ -550,3 +553,239 @@ export function copyLink(): void {
     }
   })
 }
+
+// ── Auth render functions ─────────────────────────────────────────────────────
+
+function showAuthContainer(): void {
+  const auth = document.getElementById('auth-container')
+  const scoring = document.getElementById('scoring-container')
+  if (auth) auth.style.display = ''
+  if (scoring) scoring.style.display = 'none'
+}
+
+function showScoringContainer(): void {
+  const auth = document.getElementById('auth-container')
+  const scoring = document.getElementById('scoring-container')
+  if (auth) auth.style.display = 'none'
+  if (scoring) scoring.style.display = ''
+}
+
+export function renderAuthScreen(): void {
+  const container = document.getElementById('auth-container')
+  if (!container) return
+  showAuthContainer()
+  container.innerHTML =
+    '<div class="auth-container">' +
+    '<div class="login-card">' +
+    '<h1>LENTOPALLO</h1>' +
+    '<p class="login-subtitle">Kirjaudu sy\u00f6tt\u00e4m\u00e4ll\u00e4 s\u00e4hk\u00f6postisi</p>' +
+    '<input type="email" class="login-input" id="loginEmail" placeholder="s\u00e4hk\u00f6posti@esimerkki.fi" autofocus>' +
+    '<div class="login-error" id="loginError" style="display:none"></div>' +
+    '<button class="login-btn" id="loginBtn">L\u00e4het\u00e4 kirjautumislinkki</button>' +
+    '</div>' +
+    '</div>'
+
+  const btn = document.getElementById('loginBtn') as HTMLButtonElement | null
+  const input = document.getElementById('loginEmail') as HTMLInputElement | null
+  if (btn) btn.addEventListener('click', handleLogin)
+  if (input) input.addEventListener('keydown', (e: KeyboardEvent) => { if (e.key === 'Enter') handleLogin() })
+}
+
+async function handleLogin(): Promise<void> {
+  const input = document.getElementById('loginEmail') as HTMLInputElement | null
+  const btn = document.getElementById('loginBtn') as HTMLButtonElement | null
+  const errorEl = document.getElementById('loginError')
+  if (!input || !btn) return
+
+  const email = input.value.trim()
+  if (!email.includes('@')) {
+    input.classList.add('input-error')
+    if (errorEl) { errorEl.textContent = 'Sy\u00f6t\u00e4 kelvollinen s\u00e4hk\u00f6postiosoite.'; errorEl.style.display = '' }
+    return
+  }
+
+  input.classList.remove('input-error')
+  if (errorEl) errorEl.style.display = 'none'
+  btn.disabled = true
+  btn.textContent = 'L\u00e4hetet\u00e4\u00e4n\u2026'
+
+  const { error } = await sendMagicLink(email)
+  if (error) {
+    btn.disabled = false
+    btn.textContent = 'L\u00e4het\u00e4 kirjautumislinkki'
+    if (errorEl) { errorEl.textContent = error.message; errorEl.style.display = '' }
+    return
+  }
+  renderLinkSent(email)
+}
+
+export function renderLinkSent(email: string): void {
+  const container = document.getElementById('auth-container')
+  if (!container) return
+  showAuthContainer()
+  container.innerHTML =
+    '<div class="auth-container">' +
+    '<div class="link-sent-card">' +
+    '<div class="link-sent-check">&#10003;</div>' +
+    '<h2>Linkki l\u00e4hetetty</h2>' +
+    '<p>Tarkista s\u00e4hk\u00f6postisi ja klikkaa kirjautumislinkkia.</p>' +
+    '<button class="resend-link" id="resendBtn" disabled>L\u00e4het\u00e4 uudelleen (60s)</button>' +
+    '</div>' +
+    '</div>'
+
+  let secondsLeft = 60
+  const resendBtn = document.getElementById('resendBtn') as HTMLButtonElement | null
+  const countdown = setInterval(() => {
+    secondsLeft--
+    if (resendBtn) {
+      if (secondsLeft <= 0) {
+        clearInterval(countdown)
+        resendBtn.disabled = false
+        resendBtn.textContent = 'L\u00e4het\u00e4 uudelleen'
+        resendBtn.addEventListener('click', () => renderAuthScreen())
+      } else {
+        resendBtn.textContent = 'L\u00e4het\u00e4 uudelleen (' + secondsLeft + 's)'
+      }
+    } else {
+      clearInterval(countdown)
+    }
+  }, 1000)
+
+  void email // suppress unused warning
+}
+
+export function renderAuthLoading(): void {
+  const container = document.getElementById('auth-container')
+  if (!container) return
+  showAuthContainer()
+  container.innerHTML =
+    '<div class="auth-container">' +
+    '<div class="login-card">' +
+    '<h1>LENTOPALLO</h1>' +
+    '<p class="auth-loading-text">Kirjaudutaan sis\u00e4\u00e4n</p>' +
+    '</div>' +
+    '</div>'
+}
+
+export function renderAuthError(): void {
+  const container = document.getElementById('auth-container')
+  if (!container) return
+  showAuthContainer()
+  container.innerHTML =
+    '<div class="auth-container">' +
+    '<div class="auth-error-card">' +
+    '<h2>Linkki on vanhentunut</h2>' +
+    '<p>Kirjautumislinkki on k\u00e4ytetty tai vanhentunut. Pyyd\u00e4 uusi linkki.</p>' +
+    '<button class="login-btn" id="retryAuthBtn">Pyyd\u00e4 uusi linkki</button>' +
+    '</div>' +
+    '</div>'
+  const btn = document.getElementById('retryAuthBtn')
+  if (btn) btn.addEventListener('click', () => renderAuthScreen())
+}
+
+export async function renderTeamSelect(userId: string): Promise<void> {
+  const container = document.getElementById('auth-container')
+  if (!container) return
+  showAuthContainer()
+
+  // Show loading while fetching
+  container.innerHTML =
+    '<div class="auth-container">' +
+    '<p class="auth-loading-text">Ladataan joukkueita</p>' +
+    '</div>'
+
+  const profile = await fetchUserProfile(userId)
+  if (!profile || profile.club_id === null) {
+    renderNoClubState()
+    return
+  }
+
+  const teams = await fetchTeams()
+  const emailHtml = esc(state.userEmail || '')
+  let teamsHtml: string
+  if (teams.length === 0) {
+    teamsHtml = '<p class="empty-teams-text">Ei joukkueita. Pyyd\u00e4 j\u00e4rjestelm\u00e4nvalvojaa luomaan joukkue.</p>'
+  } else {
+    teamsHtml = '<div class="team-list" id="teamList">' +
+      teams.map(t =>
+        '<div class="team-card" data-team-id="' + t.id + '" data-team-name="' + esc(t.name) + '">' +
+        '<span class="team-card-name">' + esc(t.name) + '</span>' +
+        '<span class="team-card-chevron">\u203a</span>' +
+        '</div>'
+      ).join('') +
+      '</div>'
+  }
+
+  container.innerHTML =
+    '<div style="padding:0 16px;max-width:560px;margin:0 auto">' +
+    '<div class="team-header">' +
+    '<div class="team-header-left"><h1>LENTOPALLO</h1></div>' +
+    '<div class="team-header-right">' +
+    '<span class="user-email">' + emailHtml + '</span>' +
+    '<button class="signout-link" id="signOutBtn">Kirjaudu ulos</button>' +
+    '</div>' +
+    '</div>' +
+    '<h2 class="team-section-heading">VALITSE JOUKKUE</h2>' +
+    teamsHtml +
+    '</div>'
+
+  const signOutBtn = document.getElementById('signOutBtn')
+  if (signOutBtn) signOutBtn.addEventListener('click', handleSignOut)
+
+  if (teams.length > 0) {
+    const teamList = document.getElementById('teamList')
+    if (teamList) {
+      teamList.addEventListener('click', (e: Event) => {
+        const card = (e.target as HTMLElement).closest('.team-card') as HTMLElement | null
+        if (card && card.dataset.teamId && card.dataset.teamName) {
+          selectTeam(card.dataset.teamId, card.dataset.teamName)
+        }
+      })
+    }
+  }
+}
+
+export function renderNoClubState(): void {
+  const container = document.getElementById('auth-container')
+  if (!container) return
+  showAuthContainer()
+  container.innerHTML =
+    '<div class="auth-container">' +
+    '<div class="login-card">' +
+    '<h1>LENTOPALLO</h1>' +
+    '<p class="no-club-text">Odota j\u00e4rjestelm\u00e4nvalvojan hyv\u00e4ksyint\u00e4\u00e4</p>' +
+    '<button class="signout-link" id="signOutBtn" style="display:block;margin:0 auto">Kirjaudu ulos</button>' +
+    '</div>' +
+    '</div>'
+  const btn = document.getElementById('signOutBtn')
+  if (btn) btn.addEventListener('click', handleSignOut)
+}
+
+export function selectTeam(teamId: string, teamName: string): void {
+  state.selectedTeamId = teamId
+  state.selectedTeamName = teamName
+  state.authScreen = 'scoring'
+  showScoringContainer()
+  renderAll()
+}
+
+let signOutTimeout: ReturnType<typeof setTimeout> | null = null
+
+export function handleSignOut(): void {
+  if (!state.confirmingSignOut) {
+    state.confirmingSignOut = true
+    const btn = document.getElementById('signOutBtn')
+    if (btn) btn.textContent = 'Vahvista uloskirjautuminen'
+    signOutTimeout = setTimeout(() => {
+      state.confirmingSignOut = false
+      const btn2 = document.getElementById('signOutBtn')
+      if (btn2) btn2.textContent = 'Kirjaudu ulos'
+    }, 3000)
+  } else {
+    if (signOutTimeout) clearTimeout(signOutTimeout)
+    state.confirmingSignOut = false
+    void signOutUser()
+  }
+}
+
+Object.assign(window, { handleSignOut })
