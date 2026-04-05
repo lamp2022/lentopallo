@@ -989,4 +989,308 @@ h2 {
 [data-theme="light"] .role-dot.libero { background: #dc2626; box-shadow: 0 0 6px rgba(220,38,38,0.25); }
 [data-theme="light"] .role-dot.passari { background: #2563eb; box-shadow: 0 0 6px rgba(37,99,235,0.25); }
 [data-theme="light"] .serve-ticks { color: #c2710c; text-shadow: 0 0 4px rgba(194,113,12,0.2); }
+
+/* ============================================================
+   AUTH SCREENS — Phase 2
+   Uses --surface2 (not --surface) per UI-SPEC.md
+   ============================================================ */
+
+/* Auth container — centers content vertically */
+.auth-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+  padding: 20px;
+}
+
+/* Login card */
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 32px 24px;
+}
+
+.login-card h1 {
+  font-family: 'DM Mono', 'SF Mono', 'Cascadia Code', Consolas, Menlo, monospace;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--blue);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  text-align: center;
+  margin: 0 0 8px 0;
+}
+
+.login-card .login-subtitle {
+  font-size: 14px;
+  color: var(--text2);
+  text-align: center;
+  margin: 0 0 24px 0;
+  line-height: 1.5;
+}
+
+/* Email input */
+.login-input {
+  display: block;
+  width: 100%;
+  height: 52px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  font-family: 'DM Mono', monospace;
+  font-size: 14px;
+  padding: 0 12px;
+  box-sizing: border-box;
+  margin-bottom: 16px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.login-input:focus {
+  border-color: var(--blue);
+  border-width: 2px;
+  padding: 0 11px; /* compensate for 2px border */
+}
+
+.login-input.input-error {
+  border-color: var(--red);
+}
+
+/* Primary CTA button */
+.login-btn {
+  display: block;
+  width: 100%;
+  height: 52px;
+  background: var(--blue);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-family: 'DM Mono', monospace;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.login-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Error text below input */
+.login-error {
+  font-size: 13px;
+  color: var(--red);
+  margin: -12px 0 12px 0;
+}
+
+/* Link sent success state */
+.link-sent-card {
+  width: 100%;
+  max-width: 400px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 32px 24px;
+  text-align: center;
+}
+
+.link-sent-check {
+  font-family: 'DM Mono', monospace;
+  font-size: 24px;
+  color: var(--green);
+  margin-bottom: 12px;
+}
+
+.link-sent-card h2 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--green);
+  margin: 0 0 8px 0;
+}
+
+.link-sent-card p {
+  font-size: 14px;
+  color: var(--text2);
+  line-height: 1.5;
+  margin: 0 0 24px 0;
+}
+
+.resend-link {
+  font-size: 14px;
+  color: var(--blue);
+  text-decoration: underline;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 12px 4px;
+  font-family: inherit;
+}
+
+.resend-link:disabled {
+  color: var(--text3);
+  cursor: not-allowed;
+  text-decoration: none;
+}
+
+/* Auth loading screen */
+.auth-loading-text {
+  font-size: 14px;
+  color: var(--text2);
+  text-align: center;
+}
+
+@keyframes ellipsis {
+  0% { content: ''; }
+  33% { content: '.'; }
+  66% { content: '..'; }
+  100% { content: '...'; }
+}
+
+.auth-loading-text::after {
+  content: '...';
+  animation: ellipsis 1.2s steps(3, end) infinite;
+}
+
+/* Auth error screen */
+.auth-error-card {
+  width: 100%;
+  max-width: 400px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 32px 24px;
+  text-align: center;
+}
+
+.auth-error-card h2 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0 0 8px 0;
+}
+
+.auth-error-card p {
+  font-size: 14px;
+  color: var(--text2);
+  line-height: 1.5;
+  margin: 0 0 24px 0;
+}
+
+/* Team selection screen */
+.team-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  margin-bottom: 16px;
+}
+
+.team-header-left h1 {
+  margin: 0;
+}
+
+.team-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-email {
+  font-size: 14px;
+  color: var(--text3);
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.signout-link {
+  font-size: 14px;
+  color: var(--red);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 12px 4px;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.team-section-heading {
+  font-family: 'DM Mono', monospace;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text2);
+  letter-spacing: 0.06em;
+  margin: 0 0 12px 0;
+}
+
+.team-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 520px;
+}
+
+.team-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 20px;
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: border-color 0.15s, transform 0.1s;
+}
+
+.team-card:hover {
+  border-color: var(--blue);
+}
+
+.team-card:active {
+  transform: scale(0.97);
+}
+
+.team-card-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  flex: 1;
+}
+
+.team-card-chevron {
+  font-size: 18px;
+  color: var(--text3);
+  font-family: 'DM Mono', monospace;
+}
+
+/* No-club state */
+.no-club-text {
+  font-size: 14px;
+  color: var(--text3);
+  text-align: center;
+  padding: 48px 20px;
+}
+
+/* Empty teams state */
+.empty-teams-text {
+  font-size: 14px;
+  color: var(--text3);
+  text-align: center;
+  padding: 48px 20px;
+}
+
+/* Hide scoring UI when on auth screens */
+.auth-visible .scoring-ui {
+  display: none;
+}
 [data-theme="light"] .streak-badge { color: #c2710c; text-shadow: 0 0 4px rgba(194,113,12,0.2); }
