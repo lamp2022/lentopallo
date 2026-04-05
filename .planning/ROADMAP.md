@@ -47,7 +47,11 @@ Plans:
   3. Magic link redirect lands correctly on the GitHub Pages production URL
   4. No Supabase service role key appears anywhere in the built client bundle
   5. After login, user sees a team selection screen and can enter the scoring view for their team
-**Plans**: TBD
+**Plans:** 3 plans
+Plans:
+- [ ] 02-01-PLAN.md — Supabase client singleton, auth helpers, team fetch, build-time security guard
+- [ ] 02-02-PLAN.md — Auth UI screens (login, loading, team select) and main.ts auth state gate
+- [ ] 02-03-PLAN.md — Admin profile RLS migration and end-to-end auth verification
 **UI hint**: yes
 
 ### Phase 3: Game Loop & Sync
@@ -96,7 +100,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation | 3/4 | In Progress|  |
-| 2. Auth & Access | 0/? | Not started | - |
+| 2. Auth & Access | 0/3 | Planned | - |
 | 3. Game Loop & Sync | 0/? | Not started | - |
 | 4. Statistics & Roster | 0/? | Not started | - |
 | 5. Admin & Polish | 0/? | Not started | - |
