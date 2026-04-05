@@ -80,10 +80,10 @@
   --text2: #4a4040;
   --text3: #6b6058;
 
-  /* Murrettu teal aksentti */
-  --cyan: #356860;
-  --cyan-dim: rgba(53, 104, 96, 0.12);
-  --blue: #356860;
+  /* Saturoitu teal aksentti */
+  --cyan: #0f766e;
+  --cyan-dim: rgba(15, 118, 110, 0.12);
+  --blue: #115e58;
   --green: #2d8659;
   --green-dim: rgba(45, 134, 89, 0.08);
   --red: #a33030;
