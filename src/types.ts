@@ -53,3 +53,6 @@ export interface ScoreView {
   point: Record<number, number>;
   total: Record<number, number>;
 }
+
+// Auth screen states
+export type AuthScreen = 'login' | 'loading' | 'link-sent' | 'team-select' | 'scoring' | 'no-club' | 'auth-error'
