@@ -753,7 +753,7 @@ export function renderNoClubState(): void {
     '<div class="auth-container">' +
     '<div class="login-card">' +
     '<h1>LENTOPALLO</h1>' +
-    '<p class="no-club-text">Odota j\u00e4rjestelm\u00e4nvalvojan hyv\u00e4ksyint\u00e4\u00e4</p>' +
+    '<p class="no-club-text">Odota j\u00e4rjestelm\u00e4nvalvojan hyv\u00e4ksynt\u00e4\u00e4</p>' +
     '<button class="signout-link" id="signOutBtn" style="display:block;margin:0 auto">Kirjaudu ulos</button>' +
     '</div>' +
     '</div>'
