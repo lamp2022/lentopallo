@@ -49,9 +49,9 @@ Plans:
   5. After login, user sees a team selection screen and can enter the scoring view for their team
 **Plans:** 3 plans
 Plans:
-- [ ] 02-01-PLAN.md — Supabase client singleton, auth helpers, team fetch, build-time security guard
-- [ ] 02-02-PLAN.md — Auth UI screens (login, loading, team select) and main.ts auth state gate
-- [ ] 02-03-PLAN.md — Admin profile RLS migration and end-to-end auth verification
+- [x] 02-01-PLAN.md — Supabase client singleton, auth helpers, team fetch, build-time security guard
+- [x] 02-02-PLAN.md — Auth UI screens (login, loading, team select) and main.ts auth state gate
+- [x] 02-03-PLAN.md — Admin profile RLS migration and end-to-end auth verification
 **UI hint**: yes
 
 ### Phase 3: Game Loop & Sync
