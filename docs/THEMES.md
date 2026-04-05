@@ -70,9 +70,66 @@ Neutral grays, no blue cast. Accent colors are bright/saturated for contrast on 
 - Net line: dashed repeating-linear-gradient with `--text2` at 0.8 opacity
 - Overlays: `backdrop-filter: blur(4px)` over `var(--overlay)`
 
-## Light Theme
+## Light Theme (current — "Hunaja Warm")
 
-Crisp neutral light. No warm tint — clean grays for maximum sharpness. Accent colors darkened for contrast.
+Warm cream background, hunaja-yellow court cells, murrettu accents. Warm navy rotation button.
+
+```css
+[data-theme="light"] {
+  --bg: #f5f3ef;
+  --surface: #f5e6c8;         /* hunaja court cells */
+  --surface2: #e8e2d8;
+  --surface3: #ddd6ca;
+  --glass: rgba(45, 92, 84, 0.06);
+
+  --border: #c8bfb0;
+  --border2: #a09688;
+  --border-glow: rgba(45, 92, 84, 0.20);
+
+  --text: #1a1a1a;            /* 15.7:1 on bg — AAA */
+  --text2: #4a4040;           /*  9.0:1 on bg — AAA */
+  --text3: #6b6058;           /*  5.5:1 on bg — AA  */
+
+  --cyan: #0f766e;            /* teal accent (focus, hovers, active set) */
+  --cyan-dim: rgba(15, 118, 110, 0.12);
+  --blue: #115e58;
+  --green: #2d8659;           /* murrettu green +1 button */
+  --green-dim: rgba(45, 134, 89, 0.08);
+  --red: #a33030;             /* murrettu red -1 button */
+  --red-dim: rgba(163, 48, 48, 0.08);
+  --amber: #7a5818;           /* murrettu amber */
+  --amber-dim: rgba(122, 88, 24, 0.08);
+
+  --rotate-from: #3d5288;     /* warm navy rotation button */
+  --rotate-to: #2f4070;
+  --green-gradient: #237548;
+  --red-gradient: #8a2424;
+}
+```
+
+### Light theme fixed indicator colors (CSS overrides)
+
+These override `--red`/`--cyan`/`--amber` for specific elements to keep them vivid:
+
+| Element | Color | Purpose |
+|---------|-------|---------|
+| `.role-dot.libero` | `#dc2626` | Vivid red dot on court |
+| `.role-dot.passari` | `#2563eb` | Vivid blue dot on court |
+| `.serve-ticks` | `#c2710c` | Orange serve indicators |
+| `.streak-badge` | `#c2710c` | Orange streak markers |
+
+### Light theme details
+
+- No grain overlay (`--grain-opacity: 0`)
+- No score popup glow (`--popup-glow: none`)
+- Warm overlay backdrop (`rgba(40, 30, 15, 0.3)`)
+- Warm shadow tint (`rgba(80,60,30,...)`)
+
+---
+
+## Archived: "Crisp Gray" Light Theme (v1)
+
+Previous light theme — neutral grays, no warmth. Kept for reference.
 
 ```css
 [data-theme="light"] {
@@ -80,48 +137,21 @@ Crisp neutral light. No warm tint — clean grays for maximum sharpness. Accent 
   --surface: #fafafa;
   --surface2: #e0e0e0;
   --surface3: #d2d2d2;
-  --glass: rgba(14, 116, 144, 0.06);
 
   --border: #b8b8b8;
   --border2: #909090;
-  --border-glow: rgba(14, 116, 144, 0.20);
 
-  --text: #0a0a0a;       /* 17.4:1 on bg — AAA */
-  --text2: #303030;      /* 11.5:1 on bg — AAA */
-  --text3: #555555;      /*  6.4:1 on bg — AA  */
+  --text: #0a0a0a;
+  --text2: #303030;
+  --text3: #555555;
 
-  --cyan: #0e7490;       /*  5.1:1 on bg — AA  */
-  --cyan-dim: rgba(14, 116, 144, 0.10);
-  --blue: #1d4ed8;       /*  6.5:1 on bg — AA  */
-  --green: #047857;      /*  5.3:1 on bg — AA  */
-  --green-dim: rgba(4, 120, 87, 0.08);
-  --red: #b91c1c;        /*  6.2:1 on bg — AA  */
-  --red-dim: rgba(185, 28, 28, 0.08);
-  --amber: #b45309;      /*  4.9:1 on bg — AA  */
-  --amber-dim: rgba(180, 83, 9, 0.08);
-
-  --shadow-sm: 0 1px 2px rgba(0,0,0,0.06);
-  --shadow-md: 0 2px 8px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
-  --shadow-lg: 0 4px 16px rgba(0,0,0,0.10), 0 2px 4px rgba(0,0,0,0.06);
-  --shadow-glow-cyan: 0 0 16px rgba(14, 116, 144, 0.12), 0 0 4px rgba(14, 116, 144, 0.18);
-  --shadow-glow-green: 0 0 16px rgba(4, 120, 87, 0.12), 0 0 4px rgba(4, 120, 87, 0.18);
-  --shadow-glow-red: 0 0 16px rgba(185, 28, 28, 0.12), 0 0 4px rgba(185, 28, 28, 0.18);
-
-  --overlay: rgba(0, 0, 0, 0.3);
-  --score-btn-text: #fff;
-  --grain-opacity: 0;
-  --popup-glow: none;
-  --green-gradient: #059669;
-  --red-gradient: #991b1b;
+  --cyan: #0e7490;
+  --blue: #1d4ed8;
+  --green: #047857;
+  --red: #b91c1c;
+  --amber: #b45309;
 }
 ```
-
-### Light theme details
-
-- No grain overlay (`--grain-opacity: 0`)
-- No score popup glow (`--popup-glow: none`)
-- Lighter overlay backdrop (`rgba(0,0,0,0.3)`)
-- Same gradients on buttons, darker accent endpoints
 
 ## Switching
 
