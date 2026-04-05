@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite'
 
 export default defineConfig({
-  base: '/lentopallo-v2/',
+  base: '/lentopallo/',
   plugins: [
     {
       name: 'no-service-role-in-bundle',
