@@ -1,4 +1,4 @@
-import type { Player, Court, GameEvent, CourtPosition, AuthScreen } from './types'
+import type { Player, Court, GameEvent, CourtPosition, AuthScreen, NotationEvent, ActiveTab } from './types'
 
 export const state = {
   players: [] as Player[],
@@ -19,6 +19,12 @@ export const state = {
   userEmail: null as string | null,
   userRole: null as string | null,
   confirmingSignOut: false,
+  initialCourt: null as Court | null,
+  setsStarted: [] as number[],
+  // Notation tab
+  activeTab: 'rotation' as ActiveTab,
+  notationLog: [] as NotationEvent[],
+  notationPickerPos: null as CourtPosition | null,
 }
 
 export function getPlayerByNr(nr: number): Player | undefined {

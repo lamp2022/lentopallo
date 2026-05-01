@@ -4,22 +4,61 @@ import { esc } from './utils'
 import { recalcScores, calcStreaks, calcScoreView } from './scoring'
 import { saveState, encodeShareUrl } from './persistence'
 import { rotate as rotateCourt } from './court'
-import type { CourtPosition } from './types'
-import { sendMagicLink, signOutUser } from './auth'
+import type { CourtPosition, NotationSkill, NotationGrade, NotationEvent } from './types'
+import { sendMagicLink, signOutUser, signInWithPassword } from './auth'
 import { fetchTeams, fetchUserProfile } from './teams'
+
+export const CLEAR_COURT_LABEL = 'Tyhjennä kenttä'
+
+// On first game action of set 1, snapshot the court layout so set 2/3 can revert to it.
+function captureInitialCourtIfNeeded(): void {
+  if (state.currentSet === 1 && state.initialCourt === null) {
+    state.initialCourt = JSON.parse(JSON.stringify(state.court)) as typeof state.court
+    if (!state.setsStarted.includes(1)) state.setsStarted.push(1)
+  }
+}
 
 // ── renderAll ────────────────────────────────────────────────────────────────
 
 export function renderAll(): void {
   if (state.authScreen !== 'scoring') return
+  renderTabBar()
   renderSetBar()
   renderRoster()
   renderCourt()
-  renderScoreBtns()
-  renderBench()
-  renderScoreBoard()
+  if (state.activeTab === 'rotation') {
+    showEl('scoreBtns'); showEl('serverInfo'); showEl('rotateSection'); showEl('bench'); showEl('scoreSection')
+    hideEl('notationSummary')
+    showEl('rosterBody'); showEl('rosterHeader')
+    renderScoreBtns()
+    renderBench()
+    renderScoreBoard()
+  } else {
+    hideEl('scoreBtns'); hideEl('serverInfo'); hideEl('rotateSection'); hideEl('bench'); hideEl('scoreSection')
+    hideEl('rosterBody'); hideEl('rosterHeader')
+    showEl('notationSummary')
+    renderNotationSummary()
+  }
   saveState()
   setTimeout(() => { state.lastTickPlayer = null }, 500)
+}
+
+function showEl(id: string): void { const el = document.getElementById(id); if (el) el.style.display = '' }
+function hideEl(id: string): void { const el = document.getElementById(id); if (el) el.style.display = 'none' }
+
+// ── renderTabBar ─────────────────────────────────────────────────────────────
+
+export function renderTabBar(): void {
+  const el = document.getElementById('tabBar')
+  if (!el) return
+  el.innerHTML =
+    `<button class="btn-tab${state.activeTab === 'rotation' ? ' active' : ''}" onclick="setActiveTab('rotation')">Rotaatio</button>` +
+    `<button class="btn-tab${state.activeTab === 'notation' ? ' active' : ''}" onclick="setActiveTab('notation')">Merkinn&auml;t</button>`
+}
+
+export function setActiveTab(tab: 'rotation' | 'notation'): void {
+  state.activeTab = tab
+  renderAll()
 }
 
 // ── renderSetBar ─────────────────────────────────────────────────────────────
@@ -28,9 +67,18 @@ export function renderSetBar(): void {
   const el = document.getElementById('setBar')
   if (!el) return
   let html = '<span>Er&auml;:</span>'
-  for (let i = 1; i <= 3; i++) {
-    const active = i === state.currentSet ? ' active' : ''
-    html += `<button class="btn-set${active}" onclick="setSet(${i})">${i}</button>`
+  if (state.activeTab === 'notation') {
+    for (let i = 1; i <= 3; i++) {
+      const active = i === state.scoreViewSet ? ' active' : ''
+      html += `<button class="btn-set${active}" onclick="setScoreView('${i}')">${i}</button>`
+    }
+    const allActive = state.scoreViewSet === 0 ? ' active' : ''
+    html += `<button class="btn-set${allActive}" onclick="setScoreView('0')">Yht</button>`
+  } else {
+    for (let i = 1; i <= 3; i++) {
+      const active = i === state.currentSet ? ' active' : ''
+      html += `<button class="btn-set${active}" onclick="setSet(${i})">${i}</button>`
+    }
   }
   el.innerHTML = html
 }
@@ -58,6 +106,13 @@ export function renderCourt(): void {
         if (p.role) dotHtml = `<span class="role-dot ${esc(p.role)}"></span>`
       }
     }
+    if (state.activeTab === 'notation') {
+      return `<div class="court-cell-wrap">` +
+        `<div class="pos-nr">Paikka ${pos}</div>` +
+        `<div class="court-cell court-cell-notation" data-court-pos="${pos}" onclick="openNotationPicker(${pos})">` +
+        `<div class="notation-pos-nr">${pos}</div>` +
+        `</div></div>`
+    }
     const tickCount = playerNr ? (state.serveTicks[playerNr] || 0) : 0
     let tickDots = ''
     if (tickCount > 0) {
@@ -69,7 +124,7 @@ export function renderCourt(): void {
     const tickHtml = `<div class="serve-ticks">${tickDots}</div>`
     return `<div class="court-cell-wrap">` +
       `<div class="pos-nr">Paikka ${pos}</div>` +
-      `<div class="court-cell" onclick="openPicker(${pos})">` +
+      `<div class="court-cell" data-court-pos="${pos}" onclick="openPicker(${pos})">` +
       nameHtml +
       `<div class="player-nr${cls}">${display}${dotHtml}</div>` +
       tickHtml +
@@ -141,10 +196,11 @@ export function renderScoreBoard(): void {
 
   let html = `<h3>Pisteet <select class="score-select" onchange="setScoreView(this.value)">${selOpts}</select></h3>`
   html += '<div class="score-list">'
-  html += '<div class="score-row score-header"><span></span><span class="score-col-hdr">Sy&ouml;t&ouml;t</span><span class="score-col-hdr">Pelit.</span><span class="score-col-hdr">Yht</span></div>'
+  html += '<div class="score-row score-header"><span></span><span class="score-col-hdr">+1</span><span class="score-col-hdr">&minus;1</span><span class="score-col-hdr">Pelit.</span><span class="score-col-hdr">Yht</span></div>'
 
   state.players.forEach(p => {
-    const sv = view.serve[p.nr] || 0
+    const svPos = view.servePos[p.nr] || 0
+    const svNeg = view.serveNeg[p.nr] || 0
     const pt = view.point[p.nr] || 0
     const tot = view.total[p.nr] || 0
     const fmt = (v: number) => v > 0 ? '+' + v : '' + v
@@ -157,9 +213,15 @@ export function renderScoreBoard(): void {
       const streaks = calcStreaks(p.nr, state.eventLog)
       if (streaks.length > 0) streakHtml = `<span class="streak-badge">${streaks.join(', ')}</span>`
     }
+    // svPos counts +1 serves (display as +N or 0); svNeg counts -1 serves (display as -N or 0)
+    const posDisplay = svPos > 0 ? '+' + svPos : '0'
+    const negDisplay = svNeg > 0 ? '−' + svNeg : '0'
+    const posCls = svPos > 0 ? 'pos' : 'zero'
+    const negCls = svNeg > 0 ? 'neg' : 'zero'
     html += `<div class="score-row">` +
       `<span><span class="score-player">#${p.nr}</span>${nameHtml}${streakHtml}</span>` +
-      `<span class="score-val ${cls(sv)}">${fmt(sv)}</span>` +
+      `<span class="score-val ${posCls}">${posDisplay}</span>` +
+      `<span class="score-val ${negCls}">${negDisplay}</span>` +
       `<span class="score-val ${cls(pt)}">${fmt(pt)}</span>` +
       `<span class="score-val ${cls(tot)}" style="font-weight:700">${fmt(tot)}</span>` +
       `</div>`
@@ -215,15 +277,39 @@ export function addPlayer(): void {
   const nrInput = document.getElementById('playerNr') as HTMLInputElement
   const nameInput = document.getElementById('playerName') as HTMLInputElement
   const nr = parseInt(nrInput.value)
-  if (!nr || nr < 1 || nr > 99) return
-  if (state.players.length >= 10) return
-  if (state.players.some(p => p.nr === nr)) return
+  if (!nr || nr < 1 || nr > 99) { showRosterError(nrInput, 'Numeron oltava 1–99'); return }
+  if (state.players.length >= 10) { showRosterError(nrInput, 'Maksimi 10 pelaajaa'); return }
+  if (state.players.some(p => p.nr === nr)) { showRosterError(nrInput, 'Numero ' + nr + ' on jo käytössä'); return }
+  clearRosterError()
   state.players.push({ nr, name: nameInput.value.trim() })
   state.players.sort((a, b) => a.nr - b.nr)
   nrInput.value = ''
   nameInput.value = ''
   nrInput.focus()
   renderAll()
+}
+
+let rosterErrorTimeout: ReturnType<typeof setTimeout> | null = null
+
+function showRosterError(el: HTMLInputElement, message: string): void {
+  el.classList.add('input-error')
+  el.focus()
+  el.select()
+  const errEl = document.getElementById('rosterError')
+  if (errEl) {
+    errEl.textContent = message
+    errEl.style.display = ''
+  }
+  if (rosterErrorTimeout) clearTimeout(rosterErrorTimeout)
+  rosterErrorTimeout = setTimeout(() => {
+    el.classList.remove('input-error')
+  }, 1500)
+}
+
+function clearRosterError(): void {
+  const errEl = document.getElementById('rosterError')
+  if (errEl) { errEl.textContent = ''; errEl.style.display = 'none' }
+  if (rosterErrorTimeout) { clearTimeout(rosterErrorTimeout); rosterErrorTimeout = null }
 }
 
 export function removePlayer(nr: number): void {
@@ -241,6 +327,11 @@ export function setSet(n: number): void {
   state.scoreViewSet = n
   state.serveTicks = {}
   state.lastTickPlayer = null
+  // First entry into set 2 or 3: revert positions to set 1's starting layout.
+  if (n > 1 && !state.setsStarted.includes(n) && state.initialCourt) {
+    state.court = JSON.parse(JSON.stringify(state.initialCourt)) as typeof state.court
+    state.setsStarted.push(n)
+  }
   renderAll()
 }
 
@@ -258,6 +349,7 @@ export function flipCourt(): void {
 export function addScore(delta: 1 | -1, evt?: MouseEvent): void {
   const serverNr = state.court[1]
   if (!serverNr) return
+  captureInitialCourtIfNeeded()
   const p = state.players.find(x => x.nr === serverNr)
   // esc() used defensively to ensure stored name is safe for later HTML rendering
   const safeName = p ? esc(p.name) : ''
@@ -292,7 +384,51 @@ export function showScorePopup(delta: number, evt?: MouseEvent | null): void {
 
 export function setScoreView(val: string): void {
   state.scoreViewSet = parseInt(val)
-  renderScoreBoard()
+  if (state.activeTab === 'notation') {
+    renderNotationSummary()
+  } else {
+    renderScoreBoard()
+  }
+}
+
+// ── Picker positioning ───────────────────────────────────────────────────────
+
+function positionPickerNearCell(pickerEl: HTMLElement, pos: number): void {
+  const cellEl = document.querySelector(`[data-court-pos="${pos}"]`) as HTMLElement | null
+  if (!cellEl) return
+
+  const rect = cellEl.getBoundingClientRect()
+  const vw = window.innerWidth
+  const vh = window.innerHeight
+  const GAP = 8
+  const PICKER_W = Math.min(340, vw - 24)
+  const EST_H = 380 // conservative height estimate
+
+  let left: number
+  let top: number
+
+  if (vw <= 500) {
+    // Mobile: full-width, below cell or above if near bottom
+    left = Math.max(8, (vw - PICKER_W) / 2)
+    top = rect.bottom + GAP
+    if (top + EST_H > vh - 8) top = Math.max(8, rect.top - EST_H - GAP)
+  } else {
+    // Desktop: prefer right of cell, fall back to left
+    top = rect.top + 24
+    left = rect.right - 20
+    if (left + PICKER_W > vw - 8) left = rect.left - PICKER_W + 20
+    if (left < 8) left = 8
+    // Clamp vertical
+    if (top + EST_H > vh - 8) top = Math.max(8, vh - EST_H - 8)
+  }
+
+  pickerEl.style.position = 'absolute'
+  pickerEl.style.left = `${left}px`
+  pickerEl.style.top = `${top}px`
+  pickerEl.style.width = `${PICKER_W}px`
+  pickerEl.style.minWidth = ''
+  pickerEl.style.maxHeight = `${vh - top - 12}px`
+  pickerEl.style.overflowY = 'auto'
 }
 
 export function openPicker(pos: number): void {
@@ -344,13 +480,16 @@ export function openPicker(pos: number): void {
     html += '<div style="color:var(--text3);font-size:12px;padding:8px">Ei vapaita pelaajia</div>'
   }
   if (state.court[pos as CourtPosition]) {
-    html += '<div class="picker-clear" onclick="clearPos()">Tyhjenj&auml;</div>'
+    html += '<div class="picker-clear" onclick="clearPos()">Tyhjenn&auml;</div>'
   }
   html += '<div class="picker-cancel" onclick="closePicker()">Peruuta</div>'
 
   const pickerEl = document.getElementById('picker')
-  if (pickerEl) pickerEl.innerHTML = html
-  document.getElementById('pickerOverlay')?.classList.add('open')
+  if (pickerEl) {
+    pickerEl.innerHTML = html
+    document.getElementById('pickerOverlay')?.classList.add('open')
+    positionPickerNearCell(pickerEl, pos)
+  }
 }
 
 export function selectPlayer(nr: number): void {
@@ -385,6 +524,7 @@ export function closePicker(e?: Event): void {
 }
 
 export function addPointFromPicker(nr: number): void {
+  captureInitialCourtIfNeeded()
   const p = state.players.find(x => x.nr === nr)
   const safePointName = p ? esc(p.name) : ''
   state.eventLog.push({
@@ -479,7 +619,7 @@ export function clearCourt(): void {
     setTimeout(() => {
       state.confirmingClear = false
       if (btn) {
-        btn.textContent = 'Tyhjenj\u00e4 kentt\u00e4'
+        btn.textContent = CLEAR_COURT_LABEL
         btn.style.borderColor = ''
         btn.style.color = ''
       }
@@ -491,7 +631,7 @@ export function clearCourt(): void {
   renderAll()
   const btn = document.getElementById('clearBtn') as HTMLButtonElement
   if (btn) {
-    btn.textContent = 'Tyhjenj\u00e4 kentt\u00e4'
+    btn.textContent = CLEAR_COURT_LABEL
     btn.style.borderColor = ''
     btn.style.color = ''
   }
@@ -522,6 +662,8 @@ export function newGame(): void {
   state.serveTicks = {}
   state.currentSet = 1
   state.scoreViewSet = 0
+  state.initialCourt = null
+  state.setsStarted = []
   renderAll()
   const btn = document.getElementById('newGameBtn') as HTMLButtonElement
   if (btn) {
@@ -532,6 +674,7 @@ export function newGame(): void {
 }
 
 export function handleRotate(): void {
+  captureInitialCourtIfNeeded()
   state.lastTickPlayer = null
   const pos1Player = state.court[1]
   if (pos1Player) {
@@ -552,6 +695,140 @@ export function copyLink(): void {
       setTimeout(() => { msg.style.display = 'none' }, 2000)
     }
   })
+}
+
+// ── Notation functions ────────────────────────────────────────────────────────
+
+const SKILL_LABELS: Record<NotationSkill, string> = { S: 'Syöttö', V: 'Vastaanotto', H: 'Hyökkäys', T: 'Torjunta' }
+
+export function openNotationPicker(pos: number): void {
+  state.notationPickerPos = pos as CourtPosition
+  const playerNr = state.court[pos as CourtPosition]
+  const player = playerNr ? state.players.find(x => x.nr === playerNr) : null
+  const playerLabel = player
+    ? ` &mdash; ${player.name ? esc(player.name) : '#' + player.nr}`
+    : ''
+
+  let html = `<h3>Paikka ${pos}${playerLabel}</h3>`
+
+  if (pos === 1) {
+    // Server: only Syöttö
+    html += `<div class="notation-skill-label">Syöttö</div>`
+    html += `<div class="notation-grid notation-grid-serve">`
+    html += notationBtn('S', '#', 'good', 'S #')
+    html += notationBtn('S', '!', 'neutral', 'S !')
+    html += notationBtn('S', '-', 'error', 'S &minus;')
+    html += `</div>`
+  } else {
+    // Positions 2-4: V, H, T — positions 5-6: V, H only (back row, no Torjunta)
+    const skills: NotationSkill[] = [5, 6].includes(pos) ? ['V', 'H'] : ['V', 'H', 'T']
+    html += `<div class="notation-grid-header"><span></span><span class="grade-good">#</span><span class="grade-neutral">!</span><span class="grade-error">&minus;</span></div>`
+    skills.forEach(skill => {
+      html += `<div class="notation-row">`
+      html += `<span class="notation-row-label">${SKILL_LABELS[skill]}</span>`
+      html += notationBtn(skill, '#', 'good', `${skill} #`)
+      html += notationBtn(skill, '!', 'neutral', `${skill} !`)
+      html += notationBtn(skill, '-', 'error', `${skill} &minus;`)
+      html += `</div>`
+    })
+  }
+
+  html += `<div class="picker-cancel" onclick="closeNotationPicker()">Peruuta</div>`
+
+  const pickerEl = document.getElementById('notationPicker')
+  if (pickerEl) {
+    pickerEl.innerHTML = html
+    document.getElementById('notationPickerOverlay')?.classList.add('open')
+    positionPickerNearCell(pickerEl, pos)
+  }
+}
+
+function notationBtn(skill: NotationSkill, grade: NotationGrade, cls: string, label: string): string {
+  return `<button class="btn-notation ${cls}" onclick="addNotation('${skill}','${grade}')">${label}</button>`
+}
+
+export function closeNotationPicker(): void {
+  document.getElementById('notationPickerOverlay')?.classList.remove('open')
+  state.notationPickerPos = null
+}
+
+export function addNotation(skill: NotationSkill, grade: NotationGrade): void {
+  const pos = state.notationPickerPos
+  if (!pos) return
+  const event: NotationEvent = {
+    id: crypto.randomUUID(),
+    ts: Date.now(),
+    set: state.currentSet,
+    position: pos,
+    skill,
+    grade,
+    playerNr: state.court[pos],
+  }
+  state.notationLog.push(event)
+  closeNotationPicker()
+  renderAll()
+}
+
+export function undoLastNotation(): void {
+  state.notationLog.pop()
+  renderAll()
+}
+
+export function renderNotationSummary(): void {
+  const el = document.getElementById('notationSummary')
+  if (!el) return
+
+  const filtered = state.scoreViewSet === 0
+    ? state.notationLog
+    : state.notationLog.filter(e => e.set === state.scoreViewSet)
+
+  // Count per position × grade
+  type PosGradeCounts = Record<NotationGrade, number>
+  const byPos: Record<number, PosGradeCounts> = {}
+  for (let p = 1; p <= 6; p++) byPos[p] = { '#': 0, '!': 0, '-': 0 }
+  filtered.forEach(e => { byPos[e.position][e.grade]++ })
+
+  const lastEvent = state.notationLog[state.notationLog.length - 1]
+  const undoLabel = lastEvent
+    ? `Peruuta: P${lastEvent.position} ${lastEvent.skill}${lastEvent.grade === '-' ? '−' : lastEvent.grade}`
+    : 'Peruuta viimeisin'
+  const undoDisabled = state.notationLog.length === 0 ? ' disabled' : ''
+
+  let selOpts = ''
+  for (let i = 1; i <= 3; i++) {
+    selOpts += `<option value="${i}"${state.scoreViewSet === i ? ' selected' : ''}>Er&auml; ${i}</option>`
+  }
+  selOpts += `<option value="0"${state.scoreViewSet === 0 ? ' selected' : ''}>Yhteens&auml;</option>`
+
+  let html = `<h3>Merkinn&auml;t <select class="score-select" onchange="setScoreView(this.value)">${selOpts}</select></h3>`
+  html += `<div class="score-list">`
+  html += `<div class="score-row score-header score-row-3col"><span></span><span class="score-col-hdr grade-good">#</span><span class="score-col-hdr grade-neutral">!</span><span class="score-col-hdr grade-error">&minus;</span></div>`
+
+  let anyRow = false
+  for (let p = 1; p <= 6; p++) {
+    const row = byPos[p]
+    const rowTotal = row['#'] + row['!'] + row['-']
+    if (rowTotal === 0) continue
+    anyRow = true
+    const goodCls = row['#'] > 0 ? 'pos' : 'zero'
+    const neutCls = row['!'] > 0 ? 'neutral' : 'zero'
+    const errCls  = row['-'] > 0 ? 'neg' : 'zero'
+    html += `<div class="score-row score-row-3col">` +
+      `<span><span class="score-player">Paikka ${p}</span></span>` +
+      `<span class="score-val ${goodCls}">${row['#'] || '&ndash;'}</span>` +
+      `<span class="score-val ${neutCls}">${row['!'] || '&ndash;'}</span>` +
+      `<span class="score-val ${errCls}">${row['-'] || '&ndash;'}</span>` +
+      `</div>`
+  }
+
+  if (!anyRow) {
+    html += `<div style="color:var(--text3);font-size:13px;padding:8px 12px">Ei merkint&ouml;j&auml;</div>`
+  }
+
+  html += `</div>`
+  html += `<button class="btn btn-sm notation-undo"${undoDisabled} onclick="undoLastNotation()" style="margin-top:8px">${undoLabel}</button>`
+
+  el.innerHTML = html
 }
 
 // ── Auth render functions ─────────────────────────────────────────────────────
@@ -582,6 +859,9 @@ export function renderAuthScreen(): void {
     '<input type="email" class="login-input" id="loginEmail" placeholder="s\u00e4hk\u00f6posti@esimerkki.fi" autofocus>' +
     '<div class="login-error" id="loginError" style="display:none"></div>' +
     '<button class="login-btn" id="loginBtn">L\u00e4het\u00e4 kirjautumislinkki</button>' +
+    (import.meta.env.DEV && import.meta.env.VITE_TEST_EMAIL && import.meta.env.VITE_TEST_PASSWORD
+      ? '<button class="login-btn login-btn-test" id="testLoginBtn" style="margin-top:12px;background:#444">Testikirjautuminen (DEV)</button>'
+      : '') +
     '</div>' +
     '</div>'
 
@@ -589,6 +869,28 @@ export function renderAuthScreen(): void {
   const input = document.getElementById('loginEmail') as HTMLInputElement | null
   if (btn) btn.addEventListener('click', handleLogin)
   if (input) input.addEventListener('keydown', (e: KeyboardEvent) => { if (e.key === 'Enter') handleLogin() })
+
+  const testBtn = document.getElementById('testLoginBtn') as HTMLButtonElement | null
+  if (testBtn) testBtn.addEventListener('click', handleTestLogin)
+}
+
+async function handleTestLogin(): Promise<void> {
+  const btn = document.getElementById('testLoginBtn') as HTMLButtonElement | null
+  const errorEl = document.getElementById('loginError')
+  const email = import.meta.env.VITE_TEST_EMAIL as string | undefined
+  const password = import.meta.env.VITE_TEST_PASSWORD as string | undefined
+  if (!btn || !email || !password) return
+
+  btn.disabled = true
+  btn.textContent = 'Kirjaudutaan\u2026'
+  if (errorEl) errorEl.style.display = 'none'
+
+  const { error } = await signInWithPassword(email, password)
+  if (error) {
+    btn.disabled = false
+    btn.textContent = 'Testikirjautuminen (DEV)'
+    if (errorEl) { errorEl.textContent = error.message; errorEl.style.display = '' }
+  }
 }
 
 async function handleLogin(): Promise<void> {
@@ -788,4 +1090,7 @@ export function handleSignOut(): void {
   }
 }
 
-Object.assign(window, { handleSignOut })
+Object.assign(window, {
+  handleSignOut,
+  openNotationPicker, closeNotationPicker, addNotation, undoLastNotation, setActiveTab,
+})

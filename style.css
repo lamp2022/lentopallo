@@ -455,25 +455,21 @@ h2 {
   z-index: 100;
 }
 .picker-overlay.open {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: block;
 }
 
 .picker {
+  position: absolute;
   background: var(--surface);
   border: 1px solid var(--border2);
   border-radius: 14px;
   padding: 20px;
-  min-width: 320px;
-  max-width: 90vw;
   box-shadow: var(--shadow-lg), 0 0 40px rgba(0,0,0,0.5);
 }
-@media (max-width: 500px) { .picker { min-width: 90vw; } }
 
 .picker h3 {
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 13px;
   color: var(--text3);
   text-transform: uppercase;
   letter-spacing: .12em;
@@ -535,7 +531,7 @@ h2 {
   cursor: pointer;
   border-radius: 8px;
   font-family: var(--mono);
-  font-size: 18px;
+  font-size: 22px;
   font-weight: 500;
   color: var(--text);
   transition: background .15s, color .15s;
@@ -549,7 +545,7 @@ h2 {
   padding: 14px 16px;
   cursor: pointer;
   border-radius: 8px;
-  font-size: 15px;
+  font-size: 18px;
   font-weight: 500;
   color: var(--text3);
   border-top: 1px solid var(--border);
@@ -565,7 +561,7 @@ h2 {
   padding: 14px 16px;
   cursor: pointer;
   border-radius: 8px;
-  font-size: 15px;
+  font-size: 18px;
   font-weight: 500;
   color: var(--text3);
   text-align: center;
@@ -893,7 +889,7 @@ h2 {
 
 .score-row {
   display: grid;
-  grid-template-columns: 1fr 60px 60px 60px;
+  grid-template-columns: 1fr 48px 48px 48px 48px;
   align-items: center;
   font-family: var(--mono);
   font-size: 14px;
@@ -923,7 +919,11 @@ h2 {
 .score-val { font-weight: 500; text-align: center; font-variant-numeric: tabular-nums; }
 .score-val.pos { color: var(--green); }
 .score-val.neg { color: var(--red); }
+.score-val.neutral { color: var(--amber); }
 .score-val.zero { color: var(--text3); opacity: 0.4; }
+
+/* 3-column variant for notation rows */
+.score-row.score-row-3col { grid-template-columns: 1fr 48px 48px 48px; }
 
 /* ---- Set Bar ---- */
 
@@ -1058,8 +1058,22 @@ h2 {
   padding: 0 11px; /* compensate for 2px border */
 }
 
-.login-input.input-error {
+.login-input.input-error,
+.roster-form input.input-error {
   border-color: var(--red);
+}
+
+.roster-error {
+  margin: 8px 0 4px;
+  padding: 8px 12px;
+  background: rgba(255, 70, 70, 0.12);
+  border-left: 3px solid var(--red);
+  border-radius: 4px;
+  color: var(--red);
+  font-size: 13px;
+  font-weight: 600;
+  max-width: 420px;
+  box-sizing: border-box;
 }
 
 /* Primary CTA button */
@@ -1295,3 +1309,184 @@ h2 {
   display: none;
 }
 [data-theme="light"] .streak-badge { color: #c2710c; text-shadow: 0 0 4px rgba(194,113,12,0.2); }
+
+/* ============================================================
+   NOTATION TAB — Merkinnät
+   ============================================================ */
+
+/* ---- Tab Bar ---- */
+
+.tab-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  max-width: 520px;
+}
+
+.btn-tab {
+  flex: 1;
+  height: 44px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface2);
+  color: var(--text3);
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all .2s;
+}
+.btn-tab:hover {
+  border-color: var(--cyan);
+  color: var(--cyan);
+}
+.btn-tab.active {
+  background: var(--cyan);
+  color: var(--bg);
+  border-color: var(--cyan);
+  box-shadow: var(--shadow-glow-cyan);
+}
+
+/* ---- Notation Picker ---- */
+
+.notation-skill-label {
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--text3);
+  margin-bottom: 8px;
+}
+
+.notation-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.notation-grid-header {
+  display: grid;
+  grid-template-columns: 100px repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 6px;
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  text-align: center;
+}
+
+.notation-row {
+  display: grid;
+  grid-template-columns: 100px repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 6px;
+  align-items: center;
+}
+
+.notation-row-label {
+  font-family: var(--mono);
+  font-size: 15px;
+  color: var(--text2);
+  text-align: right;
+  padding-right: 6px;
+  white-space: nowrap;
+}
+
+.btn-notation {
+  height: 64px;
+  border-radius: 10px;
+  font-family: var(--mono);
+  font-size: 18px;
+  font-weight: 700;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  cursor: pointer;
+  transition: all .15s;
+  letter-spacing: .02em;
+}
+.btn-notation:active { transform: scale(.93); }
+
+.btn-notation.good  { border-color: var(--green); color: var(--green); }
+.btn-notation.good:hover  { background: var(--green-dim); box-shadow: var(--shadow-glow-green); }
+
+.btn-notation.neutral { border-color: var(--amber); color: var(--amber); }
+.btn-notation.neutral:hover { background: var(--amber-dim); }
+
+.btn-notation.error { border-color: var(--red); color: var(--red); }
+.btn-notation.error:hover { background: var(--red-dim); box-shadow: var(--shadow-glow-red); }
+
+/* Grade column header colours */
+.grade-good    { color: var(--green); }
+.grade-neutral { color: var(--amber); }
+.grade-error   { color: var(--red); }
+
+/* ---- Notation Summary ---- */
+
+.notation-summary { margin-top: 20px; }
+
+.notation-summary h3 {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  margin-bottom: 10px;
+}
+
+.notation-table-wrap { max-width: 360px; }
+
+.notation-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--mono);
+  font-size: 14px;
+}
+.notation-table th {
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  padding: 4px 10px;
+  text-align: right;
+}
+.notation-table th:first-child { text-align: left; color: var(--text3); }
+.notation-table td {
+  padding: 9px 10px;
+  border-bottom: 1px solid var(--border);
+}
+.notation-skill-cell {
+  color: var(--text2);
+  font-size: 13px;
+}
+.notation-table td:not(:first-child) {
+  text-align: right;
+  font-weight: 600;
+}
+
+.notation-undo {
+  margin-top: 12px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text3);
+}
+.notation-undo:hover:not(:disabled) { color: var(--red); border-color: var(--red); }
+.notation-undo:disabled { opacity: .35; cursor: default; }
+
+/* Notation-mode court cell — position number only */
+.court-cell-notation {
+  cursor: pointer;
+  justify-content: center;
+}
+.notation-pos-nr {
+  font-family: var(--mono);
+  font-size: 48px;
+  font-weight: 500;
+  color: var(--text3);
+  line-height: 1;
+}

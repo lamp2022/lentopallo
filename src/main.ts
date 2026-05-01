@@ -2,6 +2,7 @@ import { loadState } from './persistence'
 import { state } from './state'
 import { recalcScores } from './scoring'
 import { supabase } from './supabase'
+import { renderAll } from './render'
 import {
   addPlayer,
   toggleHelp,
@@ -26,7 +27,15 @@ import {
   renderAuthScreen,
   renderAuthLoading,
   renderTeamSelect,
+  CLEAR_COURT_LABEL,
+  openNotationPicker,
+  closeNotationPicker,
+  addNotation,
+  undoLastNotation,
+  setActiveTab,
 } from './render'
+
+const LOCAL_ONLY = import.meta.env.VITE_LOCAL_ONLY === 'true'
 
 // Theme: restore from localStorage, default dark
 function initTheme() {
@@ -80,7 +89,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.target === document.getElementById('helpOverlay')) toggleHelp()
   })
   document.getElementById('rotateBtn')!.addEventListener('click', handleRotate)
-  document.getElementById('clearBtn')!.addEventListener('click', clearCourt)
+  const clearBtn = document.getElementById('clearBtn')!
+  clearBtn.textContent = CLEAR_COURT_LABEL
+  clearBtn.addEventListener('click', clearCourt)
   document.getElementById('newGameBtn')!.addEventListener('click', newGame)
   document.getElementById('flipBtn')!.addEventListener('click', flipCourt)
   document.getElementById('rosterHeader')!.addEventListener('click', toggleRoster)
@@ -89,6 +100,9 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('playerName')!.addEventListener('keydown', (e) => { if (e.key === 'Enter') addPlayer() })
   document.getElementById('pickerOverlay')!.addEventListener('click', (e) => {
     if (e.target === document.getElementById('pickerOverlay')) closePicker()
+  })
+  document.getElementById('notationPickerOverlay')!.addEventListener('click', (e) => {
+    if (e.target === document.getElementById('notationPickerOverlay')) closeNotationPicker()
   })
   const copyBtn = document.getElementById('copyLinkBtn')
   if (copyBtn) copyBtn.addEventListener('click', copyLink)
@@ -107,7 +121,25 @@ document.addEventListener('DOMContentLoaded', () => {
     setRole,
     removePlayer,
     setSet,
+    openNotationPicker,
+    closeNotationPicker,
+    addNotation,
+    undoLastNotation,
+    setActiveTab,
   })
+
+  if (LOCAL_ONLY) {
+    state.authScreen = 'scoring'
+    state.selectedTeamId = 'local'
+    state.selectedTeamName = 'Paikallinen'
+    state.userEmail = null
+    const auth = document.getElementById('auth-container')
+    const scoring = document.getElementById('scoring-container')
+    if (auth) auth.style.display = 'none'
+    if (scoring) scoring.style.display = ''
+    renderAll()
+    return
+  }
 
   // Show loading screen while waiting for INITIAL_SESSION
   state.authScreen = 'loading'

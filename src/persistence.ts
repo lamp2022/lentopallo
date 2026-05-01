@@ -11,6 +11,9 @@ export function saveState(): void {
       eventLog: state.eventLog,
       currentSet: state.currentSet,
       serveTicks: state.serveTicks,
+      initialCourt: state.initialCourt,
+      setsStarted: state.setsStarted,
+      notationLog: state.notationLog,
     }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
   } catch (_e) { /* silent fail per original */ }
@@ -56,6 +59,9 @@ function applyState(data: GameState): void {
   state.eventLog = data.eventLog || []
   state.currentSet = data.currentSet || 1
   state.serveTicks = data.serveTicks || {}
+  state.initialCourt = data.initialCourt ?? null
+  state.setsStarted = data.setsStarted ?? []
+  state.notationLog = data.notationLog ?? []
 }
 
 function loadDefaults(): void {
@@ -74,6 +80,8 @@ export function encodeShareUrl(): string {
     eventLog: state.eventLog,
     currentSet: state.currentSet,
     serveTicks: state.serveTicks,
+    initialCourt: state.initialCourt,
+    setsStarted: state.setsStarted,
   }
   const json = JSON.stringify(data)
   const hash = btoa(unescape(encodeURIComponent(json)))

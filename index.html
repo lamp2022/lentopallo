@@ -54,6 +54,7 @@
   </div>
 
   <h1>Lentopallo &mdash; Rotaatio</h1>
+  <div class="tab-bar" id="tabBar"></div>
 
   <div class="section">
     <h2>Kentt&auml;</h2>
@@ -61,10 +62,10 @@
     <div class="net-label" id="netTop">Verkko</div>
     <div class="court" id="court"></div>
     <div class="net-label" id="netBottom" style="display:none;border-bottom:none;border-top:2px solid var(--text3);margin-top:4px;margin-bottom:0">Verkko</div>
-    <div class="rotate-section">
+    <div class="rotate-section" id="rotateSection">
       <button class="btn-rotate" id="rotateBtn">Rotaatio &rarr;</button>
       <div style="display:flex;gap:12px;margin-top:4px">
-        <button class="btn btn-sm" id="clearBtn">Tyhjenn&auml; kentt&auml;</button>
+        <button class="btn btn-sm" id="clearBtn"></button>
         <button class="btn btn-sm" id="newGameBtn">Uusi peli</button>
       </div>
     </div>
@@ -73,6 +74,7 @@
     <div class="bench" id="bench"></div>
     <div style="margin:12px 0"><button class="btn-flip" id="flipBtn">K&auml;&auml;nn&auml; kentt&auml;</button></div>
     <div class="score-section" id="scoreSection"></div>
+    <div class="notation-summary" id="notationSummary" style="display:none"></div>
   </div>
 
   <div class="roster-section">
@@ -86,6 +88,7 @@
         <input type="text" id="playerName" placeholder="Nimi (vapaaehtoinen)">
         <button class="btn btn-sm" id="addPlayerBtn">Lis&auml;&auml;</button>
       </div>
+      <div class="roster-error" id="rosterError" role="alert" aria-live="polite" style="display:none"></div>
       <div class="roster-list" id="rosterList"></div>
       <div style="margin-top:12px">
         <button class="btn btn-sm" id="copyLinkBtn">Jaa kokoonpano</button>
@@ -96,6 +99,10 @@
 
   <div class="picker-overlay" id="pickerOverlay">
     <div class="picker" id="picker"></div>
+  </div>
+
+  <div class="picker-overlay" id="notationPickerOverlay">
+    <div class="picker" id="notationPicker"></div>
   </div>
 
   </div><!-- end scoring-container -->

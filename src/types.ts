@@ -45,14 +45,41 @@ export interface GameState {
   eventLog: GameEvent[];
   currentSet: number;
   serveTicks: Record<number, number>;
+  initialCourt?: Court | null;     // captured at first game action of set 1; baseline for set 2/3 revert
+  setsStarted?: number[];          // sets that have already been entered (revert applied once per set)
+  notationLog?: NotationEvent[];   // optional for backwards compat
 }
 
 // Score view data
 export interface ScoreView {
-  serve: Record<number, number>;
+  serve: Record<number, number>;       // net serve points (+1 sum + -1 sum)
+  servePos: Record<number, number>;    // count of +1 serve events
+  serveNeg: Record<number, number>;    // count of -1 serve events
   point: Record<number, number>;
   total: Record<number, number>;
 }
 
 // Auth screen states
 export type AuthScreen = 'login' | 'loading' | 'link-sent' | 'team-select' | 'scoring' | 'no-club' | 'auth-error'
+
+// ── Notation ─────────────────────────────────────────────────────────────────
+
+// Skill categories
+export type NotationSkill = 'S' | 'V' | 'H' | 'T'
+
+// Grade symbols: # = hyvä, ! = neutraali, - = virhe
+export type NotationGrade = '#' | '!' | '-'
+
+// Single notation event (append-only log)
+export interface NotationEvent {
+  id: string              // crypto.randomUUID()
+  ts: number              // Unix ms
+  set: number             // currentSet at time of recording
+  position: CourtPosition
+  skill: NotationSkill
+  grade: NotationGrade
+  playerNr?: number       // player in that position at recording time
+}
+
+// Active tab
+export type ActiveTab = 'rotation' | 'notation'
