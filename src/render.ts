@@ -383,9 +383,14 @@ export function showScorePopup(delta: number, evt?: MouseEvent | null): void {
 }
 
 export function setScoreView(val: string): void {
-  state.scoreViewSet = parseInt(val)
+  const n = parseInt(val)
+  state.scoreViewSet = n
   if (state.activeTab === 'notation') {
+    // Also advance currentSet so new notations are stamped to the right erä.
+    // "Yht" (0) keeps currentSet as-is.
+    if (n >= 1 && n <= 3) state.currentSet = n
     renderNotationSummary()
+    renderSetBar()
   } else {
     renderScoreBoard()
   }
