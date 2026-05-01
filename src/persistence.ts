@@ -66,9 +66,9 @@ function applyState(data: GameState): void {
 
 function loadDefaults(): void {
   state.players = [
-    { nr: 3, name: 'Pihla' }, { nr: 7, name: 'Malla' }, { nr: 17, name: 'Viivi' },
-    { nr: 23, name: 'Sanni' }, { nr: 25, name: 'Kia' }, { nr: 27, name: 'Victoria' },
-    { nr: 29, name: 'Lera' }, { nr: 35, name: 'Enni' },
+    { nr: 3, name: 'Pihla' }, { nr: 7, name: 'Malla' }, { nr: 9, name: 'Eela' },
+    { nr: 17, name: 'Viivi' }, { nr: 23, name: 'Sanni' }, { nr: 25, name: 'Kia' },
+    { nr: 27, name: 'Victoria' }, { nr: 29, name: 'Lera' }, { nr: 35, name: 'Enni' },
   ]
   state.court = { 4: 17, 3: 35, 2: 3, 5: 23, 6: 25, 1: 29 }
 }
