@@ -27,7 +27,7 @@ jobs:
           node-version: lts/*
           cache: 'npm'
       - run: npm ci
-      - run: npm run build
+      - run: npm run build -- --base /lentopallo-v2/
         env:
           VITE_LOCAL_ONLY: true
       - uses: actions/configure-pages@v5
