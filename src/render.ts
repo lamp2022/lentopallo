@@ -779,6 +779,27 @@ export function undoLastNotation(): void {
   renderAll()
 }
 
+export function clearNotations(): void {
+  if (!state.confirmingClearNotations) {
+    state.confirmingClearNotations = true
+    const btn = document.getElementById('clearNotationsBtn') as HTMLButtonElement
+    if (btn) {
+      btn.textContent = 'Vahvista tyhjennys'
+      btn.style.borderColor = 'var(--red)'
+      btn.style.color = 'var(--red)'
+    }
+    setTimeout(() => {
+      state.confirmingClearNotations = false
+      const b = document.getElementById('clearNotationsBtn') as HTMLButtonElement
+      if (b) { b.textContent = 'Tyhjennä merkinnät'; b.style.borderColor = ''; b.style.color = '' }
+    }, 3000)
+    return
+  }
+  state.confirmingClearNotations = false
+  state.notationLog = []
+  renderAll()
+}
+
 export function renderNotationSummary(): void {
   const el = document.getElementById('notationSummary')
   if (!el) return
@@ -831,7 +852,11 @@ export function renderNotationSummary(): void {
   }
 
   html += `</div>`
-  html += `<button class="btn btn-sm notation-undo"${undoDisabled} onclick="undoLastNotation()" style="margin-top:8px">${undoLabel}</button>`
+  const clearDisabled = state.notationLog.length === 0 ? ' disabled' : ''
+  html += `<div style="display:flex;gap:8px;margin-top:8px">`
+  html += `<button class="btn btn-sm notation-undo"${undoDisabled} onclick="undoLastNotation()">${undoLabel}</button>`
+  html += `<button class="btn btn-sm"${clearDisabled} id="clearNotationsBtn" onclick="clearNotations()">Tyhjenn&auml; merkinn&auml;t</button>`
+  html += `</div>`
 
   el.innerHTML = html
 }

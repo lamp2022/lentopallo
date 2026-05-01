@@ -32,6 +32,7 @@ import {
   closeNotationPicker,
   addNotation,
   undoLastNotation,
+  clearNotations,
   setActiveTab,
 } from './render'
 
@@ -125,6 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
     closeNotationPicker,
     addNotation,
     undoLastNotation,
+    clearNotations,
     setActiveTab,
   })
 

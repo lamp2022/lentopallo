@@ -25,6 +25,7 @@ export const state = {
   activeTab: 'rotation' as ActiveTab,
   notationLog: [] as NotationEvent[],
   notationPickerPos: null as CourtPosition | null,
+  confirmingClearNotations: false,
 }
 
 export function getPlayerByNr(nr: number): Player | undefined {
