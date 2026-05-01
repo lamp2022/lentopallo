@@ -82,6 +82,7 @@ export function encodeShareUrl(): string {
     serveTicks: state.serveTicks,
     initialCourt: state.initialCourt,
     setsStarted: state.setsStarted,
+    notationLog: state.notationLog,
   }
   const json = JSON.stringify(data)
   const hash = btoa(unescape(encodeURIComponent(json)))
