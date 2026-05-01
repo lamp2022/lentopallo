@@ -15,7 +15,7 @@
 ### Authentication
 
 - [ ] **AUTH-01**: User can sign up via invite link sent by admin (magic link email)
-- [ ] **AUTH-02**: User can log in with email magic link or email/password
+- [ ] **AUTH-02**: User can log in with email magic link
 - [ ] **AUTH-03**: User session persists across browser refresh
 - [ ] **AUTH-04**: Auth redirect works correctly on GitHub Pages (hash-based routing)
 - [ ] **AUTH-05**: No service role key exposed in client build (anon key only)

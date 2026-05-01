@@ -14,6 +14,11 @@ export async function sendMagicLink(email: string): Promise<{ error: Error | nul
   return { error: error ? new Error(error.message) : null }
 }
 
+export async function signInWithPassword(email: string, password: string): Promise<{ error: Error | null }> {
+  const { error } = await supabase.auth.signInWithPassword({ email, password })
+  return { error: error ? new Error(error.message) : null }
+}
+
 export async function signOutUser(): Promise<void> {
   await supabase.auth.signOut()
 }

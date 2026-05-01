@@ -1,5 +1,5 @@
 ---
-status: complete
+status: diagnosed
 phase: 01-foundation
 source: [01-01-SUMMARY.md, 01-02-SUMMARY.md, 01-03-SUMMARY.md, 01-04-SUMMARY.md]
 started: 2026-04-04T18:00:00Z
@@ -88,9 +88,15 @@ blocked: 0
   reason: "User reported: button name is 'tallenna pelaajat' which means save players. it's bad name for a share/copy link action."
   severity: minor
   test: 10
-  root_cause: ""
-  artifacts: []
-  missing: []
+  root_cause: "Button text 'Tallenna pelaajat' in index.html line 81 and help text in lines 38-39 use misleading label for what is actually a share/copy-link action"
+  artifacts:
+    - path: "index.html"
+      issue: "Button id='copyLinkBtn' has text 'Tallenna pelaajat' — should describe share/copy action"
+    - path: "index.html"
+      issue: "Help section (line 38-39) references 'Tallenna pelaajat' — needs matching update"
+  missing:
+    - "Rename button text to e.g. 'Kopioi linkki' or 'Jaa kokoonpano'"
+    - "Update help section to match new button label"
   debug_session: ""
 
 - truth: "Visual refresh delivers modern iOS-Settings-like depth with shadows and dimension"
@@ -98,7 +104,12 @@ blocked: 0
   reason: "User reported: a little bit flat"
   severity: cosmetic
   test: 12
-  root_cause: ""
-  artifacts: []
-  missing: []
+  root_cause: "Box shadows in style.css are too subtle (0 1px 3px rgba(0,0,0,0.08)) — barely visible. No layered shadow or elevation hierarchy between elements."
+  artifacts:
+    - path: "style.css"
+      issue: "Court cells and roster tags use minimal shadow (0 1px 3px rgba(0,0,0,0.08)) — needs stronger multi-layer shadows"
+  missing:
+    - "Add layered shadows (e.g. 0 1px 2px + 0 4px 12px) for more depth"
+    - "Create elevation hierarchy: cards > surface > background"
+    - "Consider subtle gradient backgrounds or inset shadows for more dimension"
   debug_session: ""

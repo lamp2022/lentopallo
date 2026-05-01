@@ -420,22 +420,13 @@ if (!profile?.club_id) {
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Has the Supabase project been created? Is the schema applied?**
-   - What we know: `.env.example` exists with placeholder values; no `.env.local` detected
-   - What's unclear: Whether the actual Supabase project is live and migration SQL has been run
-   - Recommendation: Planner Wave 0 must include a verification step: "confirm VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set in `.env.local` and schema migration has been applied"
+1. **Has the Supabase project been created? Is the schema applied?** — RESOLVED: Plan 01 and 03 user_setup sections require `.env.local` with live credentials and schema migration applied before execution.
 
-2. **How does the first admin account get created?**
-   - What we know: `inviteUserByEmail` requires service_role key (cannot be in client bundle); Phase 5 defers ADM-03
-   - What's unclear: For Phase 2 testing, someone needs an account with `role = 'admin'` and a valid `club_id` in `profiles`
-   - Recommendation: Planner must include a manual step: "Create first admin user via Supabase Dashboard > Authentication > Users, then manually set `profiles.role = 'admin'` and `profiles.club_id = [club uuid]` via SQL Editor"
+2. **How does the first admin account get created?** — RESOLVED: Plan 03 user_setup includes manual step: create first admin user via Supabase Dashboard > Authentication > Users, then set `profiles.role = 'admin'` and `profiles.club_id` via SQL Editor.
 
-3. **What GitHub username/repo slug is the app deployed to?**
-   - What we know: `vite.config.ts` base is `/lentopallo-v2/` — repo is likely named `lentopallo-v2`
-   - What's unclear: Exact GitHub Pages URL for Supabase redirect URL registration
-   - Recommendation: Planner should include: "Register `https://[github-username].github.io/lentopallo-v2/` in Supabase Dashboard > Auth > Redirect URLs"
+3. **What GitHub username/repo slug is the app deployed to?** — RESOLVED: Repo is `lentopallo-v2`, base path `/lentopallo-v2/`. Plan user_setup includes registering redirect URL in Supabase Dashboard.
 
 ---
 

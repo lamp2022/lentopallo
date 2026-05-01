@@ -51,6 +51,17 @@ Next phase: **Vite + vanilla TypeScript + Supabase JS client**, hosted on GitHub
 - Destructive actions require two-tap confirmation (already implemented via `confirmingClear` / `confirmingNewGame` flags)
 - Color convention: green = positive, red = negative/destructive, blue = action/navigation
 
+## Verification
+
+Run after any change to prove it works. Never mark complete without these:
+
+- `python3 -m http.server 8080` → open `http://localhost:8080`, exercise the changed flow in browser
+- Verify `localStorage['lentopallo']` persists: reload page, confirm state restored
+- Check 375px viewport (Chrome DevTools mobile mode): court grid visible without scroll, tap targets ≥48px
+- For scoring changes: verify `eventLog` entries appended correctly via DevTools console
+- For XSS-sensitive edits: confirm all user-generated content passed through `esc()` before DOM insertion
+- **Post-migration (Vite + TS):** `npm run typecheck`, `npm run build`, `npm run test`
+
 <!-- GSD:project-start source:PROJECT.md -->
 ## Project
 

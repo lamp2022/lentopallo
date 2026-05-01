@@ -35,18 +35,27 @@ export function calcStreaks(playerNr: number, events: GameEvent[]): number[] {
 
 export function calcScoreView(events: GameEvent[], setNr: number): ScoreView {
   const serve: Record<number, number> = {}
+  const servePos: Record<number, number> = {}
+  const serveNeg: Record<number, number> = {}
   const point: Record<number, number> = {}
   const total: Record<number, number> = {}
   const filtered = setNr === 0 ? events : events.filter(e => e.set === setNr)
   for (const e of filtered) {
-    if (!total[e.player]) {
+    if (!(e.player in total)) {
       total[e.player] = 0
       serve[e.player] = 0
+      servePos[e.player] = 0
+      serveNeg[e.player] = 0
       point[e.player] = 0
     }
     total[e.player] += e.delta
-    if (e.type === 'point') point[e.player] += e.delta
-    else serve[e.player] += e.delta
+    if (e.type === 'point') {
+      point[e.player] += e.delta
+    } else {
+      serve[e.player] += e.delta
+      if (e.delta > 0) servePos[e.player] += 1
+      else serveNeg[e.player] += 1
+    }
   }
-  return { serve, point, total }
+  return { serve, servePos, serveNeg, point, total }
 }
